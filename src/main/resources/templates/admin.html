@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta charset="UTF-8">
+    <title>People</title>
+</head>
+<body>
+<div style="display: table; margin: 0 auto; text-align: center;">
+    <p sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Выйти</a></p>
+    <table style="border: 1px solid gray;">
+        <thead>Управление пользователями</thead>
+        <tr>
+            <td style="border: 1px solid gray;">id</td>
+            <td style="border: 1px solid gray;">Имя</td>
+            <td style="border: 1px solid gray;">Возраст</td>
+            <td style="border: 1px solid gray;">Место работы</td>
+            <td style="border: 1px solid gray;"></td>
+            <td style="border: 1px solid gray;"></td>
+        </tr>
+        <tr th:each="user : ${users}">
+            <td th:text="${user.getId()}" style="border: 1px solid gray;"></td>
+            <td th:text="${user.getName()}" style="border: 1px solid gray;"></td>
+            <td th:text="${user.getAge()}" style="border: 1px solid gray;"></td>
+            <td th:text="${user.getJob()}" style="border: 1px solid gray;"></td>
+            <td style="border: 1px solid gray;">
+                <form th:method="DELETE" th:action="@{/{id}(id=${user.getId()})}">
+                    <input type="submit" value="Удалить"/>
+                </form>
+            </td>
+            <td style="border: 1px solid gray;">
+                <form th:action="@{/edit/{id}(id=${user.getId()})}">
+                    <input type="submit" value="Изменить"/>
+                </form>
+            </td>
+        </tr>
+
+    </table>
+    </br>
+    <input type="button" value="Добавить нового пользователя"
+           onclick="window.location.href='/new'"/>
+</div>
+</body>
+</html>
