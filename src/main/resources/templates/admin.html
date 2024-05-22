@@ -15,6 +15,7 @@
             <td style="border: 1px solid gray;">Имя</td>
             <td style="border: 1px solid gray;">Возраст</td>
             <td style="border: 1px solid gray;">Место работы</td>
+            <td style="border: 1px solid gray;">Роли</td>
             <td style="border: 1px solid gray;"></td>
             <td style="border: 1px solid gray;"></td>
         </tr>
@@ -23,13 +24,16 @@
             <td th:text="${user.getName()}" style="border: 1px solid gray;"></td>
             <td th:text="${user.getAge()}" style="border: 1px solid gray;"></td>
             <td th:text="${user.getJob()}" style="border: 1px solid gray;"></td>
+            <td>
+                <li th:each="role: ${user.getRoles()}" th:text="${role.getName()}"></li>
+            </td>
             <td style="border: 1px solid gray;">
-                <form th:method="DELETE" th:action="@{/{id}(id=${user.getId()})}">
+                <form th:method="DELETE" th:action="@{/admin/delete/{id}(id=${user.getId()})}">
                     <input type="submit" value="Удалить"/>
                 </form>
             </td>
             <td style="border: 1px solid gray;">
-                <form th:action="@{/edit/{id}(id=${user.getId()})}">
+                <form th:action="@{/admin/edit/{id}(id=${user.getId()})}">
                     <input type="submit" value="Изменить"/>
                 </form>
             </td>
@@ -38,7 +42,7 @@
     </table>
     </br>
     <input type="button" value="Добавить нового пользователя"
-           onclick="window.location.href='/new'"/>
+           onclick="window.location.href='/admin/new'"/>
 </div>
 </body>
 </html>

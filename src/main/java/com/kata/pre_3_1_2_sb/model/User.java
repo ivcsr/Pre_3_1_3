@@ -1,15 +1,12 @@
-package com.kata.pre_3_1_2_sb.domain;
+package com.kata.pre_3_1_2_sb.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -17,8 +14,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
-import java.util.Collection;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -27,7 +24,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "users", schema = "schema_2_3_1")
-public class UserDb {
+public class User {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -48,16 +45,15 @@ public class UserDb {
     @Column(name = "password")
     private String password;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-
+    @ManyToMany
     @JoinTable(name = "user_role", schema = "schema_2_3_1", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Collection<RoleDb> roles;
+    private Set<Role> roles;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UserDb user = (UserDb) o;
+        User user = (User) o;
         return id == user.id && age == user.age && Objects.equals(name, user.name) && Objects.equals(job, user.job);
     }
 
