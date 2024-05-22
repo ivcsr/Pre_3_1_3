@@ -16,8 +16,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Controller
 @AllArgsConstructor
@@ -33,8 +37,8 @@ public class AdminController {
     }
 
     @PostMapping("/new")
-    public String saveUser(@ModelAttribute("user") User user, @RequestParam(value = "roles") Set<Role> roleList) {
-        user.setRoles(roleList);
+    public String saveUser(@ModelAttribute("user") User user, @RequestParam("listRoles") List<Integer> roleList) {
+        user.setRoles(roleService.findRoles(roleList));
         userService.save(user);
         return "redirect:/admin";
     }
@@ -52,15 +56,15 @@ public class AdminController {
     }
 
     @PatchMapping("/edit/{id}")
-    public String updateUser(@ModelAttribute("user") User user, @RequestParam(value = "roles") Set<Role> roleList) {
-        user.setRoles(roleList);
+    public String updateUser(@ModelAttribute("user") User user, @RequestParam("listRoles") List<Integer> roleList) {
+        user.setRoles(roleService.findRoles(roleList));
         userService.updateUser(user);
         return "redirect:/admin";
     }
+
     @DeleteMapping("/delete/{id}")
     public String deleteUser(@PathVariable UUID id) {
         userService.removeUserById(id);
         return "redirect:/admin";
     }
-
 }
