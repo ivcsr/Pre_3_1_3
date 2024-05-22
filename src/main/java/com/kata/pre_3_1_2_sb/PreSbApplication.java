@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Pre312SbApplication {
+public class PreSbApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Pre312SbApplication.class, args);
+        SpringApplication.run(PreSbApplication.class, args);
     }
 
 }

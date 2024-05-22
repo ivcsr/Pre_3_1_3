@@ -1,10 +1,8 @@
 package com.kata.pre_3_1_2_sb.service;
 
-import com.kata.pre_3_1_2_sb.domain.RoleDb;
-import com.kata.pre_3_1_2_sb.domain.UserDb;
-import com.kata.pre_3_1_2_sb.exception.NotFoundException;
-import com.kata.pre_3_1_2_sb.repository.RoleRepository;
-import com.kata.pre_3_1_2_sb.repository.UserRepository;
+import com.kata.pre_3_1_2_sb.dao.UserDao;
+import com.kata.pre_3_1_2_sb.model.Role;
+import com.kata.pre_3_1_2_sb.model.User;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,84 +14,73 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @AllArgsConstructor
 public class UserServiceImpl implements UserService, UserDetailsService {
-    private final UserRepository userRepository;
+    private final UserDao userDao;
     private final PasswordEncoder passwordEncoder;
-    private final RoleRepository roleRepository;
 
     @Override
-    public List<UserDb> getUsers() {
-        List<UserDb> userList = userRepository.findAll();
-
-        if (userList.isEmpty()) {
-            throw new NotFoundException("Not found users");
-        }
-
-        return userList;
+    @Transactional
+    public void save(User newUser) {
+        String encodePassword = passwordEncoder.encode(newUser.getPassword());
+        newUser.setPassword(encodePassword);
+        userDao.save(newUser);
     }
 
     @Override
-    public UserDb getUserById(UUID id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Not found user by id " + id));
+    public List<User> getUsers() {
+        return userDao.getUsers();
+    }
+
+    @Override
+    public User getUserById(UUID id) {
+        return userDao.getUserById(id);
     }
 
     @Override
     @Transactional
-    public void saveUser(UserDb newUser) {
-        assignRoleToUser(newUser);
-        encodeAndSetPassword(newUser);
-        userRepository.save(newUser);
+    public void updateUser(User updatableUser) {
+        User originalUser = userDao.getUserById(updatableUser.getId());
+        String originalPassword = originalUser.getPassword();
+
+        if (!updatableUser.getPassword().equals(originalPassword)) {
+            encodeAndSetPassword(updatableUser);
+        }
+
+        userDao.update(updatableUser);
     }
 
-    private void assignRoleToUser(UserDb user) {
-        RoleDb roleUser = roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new NotFoundException("Role not found"));
-        user.setRoles(Collections.singletonList(roleUser));
-    }
-
-    private void encodeAndSetPassword(UserDb user) {
+    private void encodeAndSetPassword(User user) {
         String password = user.getPassword();
         user.setPassword(passwordEncoder.encode(password));
     }
 
     @Override
     @Transactional
-    public void deleteUserById(UUID id) {
-        userRepository.deleteById(id);
+    public void removeUserById(UUID id) {
+        userDao.removeById(id);
     }
 
     @Override
-    @Transactional
-    public void updateUser(UserDb updatableUser) {
-        userRepository.save(updatableUser);
-    }
-
-    @Override
-    public UserDb getUser(UserDetails userDetails) {
+    public User getUser(UserDetails userDetails) {
         String email = userDetails.getUsername();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("Not found user by email " + email));
+        return userDao.findByEmail(email);
     }
 
     @Transactional
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserDb userDb = userRepository.findByEmail(username)
-                .orElseThrow(() -> new NotFoundException("Not found user by name " + username));
+        User user = userDao.findByEmail(username);
 
-        return new org.springframework.security.core.userdetails.User(userDb.getEmail(),
-                userDb.getPassword(), mapUserRolesToGrandAuthorities(userDb.getRoles()));
+        return new org.springframework.security.core.userdetails.User(user.getEmail(),
+                user.getPassword(), mapUserRolesToGrandAuthorities(user.getRoles()));
     }
 
-    private Collection<? extends GrantedAuthority> mapUserRolesToGrandAuthorities(Collection<RoleDb> roles) {
-        return roles.stream().map(roleDb -> new SimpleGrantedAuthority(roleDb.name)).toList();
+    private Collection<? extends GrantedAuthority> mapUserRolesToGrandAuthorities(Collection<Role> roles) {
+        return roles.stream().map(role -> new SimpleGrantedAuthority(role.name)).toList();
     }
 }

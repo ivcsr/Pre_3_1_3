@@ -8,7 +8,7 @@
 <div style="display: table; margin: 0 auto; text-align: center;">
     <h2>Редактирование пользователя</h2>
     <p sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Выйти</a></p>
-    <form th:method="PATCH" th:action="@{/{id}(id=${user.getId()})}" th:object="${user}">
+    <form th:method="PATCH" th:action="@{/admin/edit/{id}(id=${user.getId()})}" th:object="${user}">
         <label for="name">Имя</label>
         <input type="text" th:field="*{name}" id="name"/>
         </br>
@@ -29,6 +29,12 @@
         <input type="text" th:field="*{password}" id="password"/>
         </br>
         </br>
+        <th:block th:each="role: ${roleList}">
+            <input type="checkbox" th:field="*{roles}"
+                   th:text="${role.getName()}" th:value="${role.getId()}"/>
+            <br>
+        </th:block>
+        <br>
         <input type="submit" value="Изменить"/>
     </form>
 </div>
