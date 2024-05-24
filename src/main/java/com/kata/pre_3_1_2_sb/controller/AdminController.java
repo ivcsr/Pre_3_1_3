@@ -5,6 +5,8 @@ import com.kata.pre_3_1_2_sb.model.User;
 import com.kata.pre_3_1_2_sb.service.RoleService;
 import com.kata.pre_3_1_2_sb.service.UserService;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -43,8 +45,11 @@ public class AdminController {
         return "redirect:/admin";
     }
     @GetMapping()
-    public String getAllUsers(Model model) {
+    public String getAdmin(@AuthenticationPrincipal UserDetails userDetails, Model model,
+                           @ModelAttribute("newUser") User user) {
         model.addAttribute("users", userService.getUsers());
+        model.addAttribute("currentUser", userService.getUser(userDetails));
+        model.addAttribute("roleList", roleService.getAllRoles());
         return "admin";
     }
 
