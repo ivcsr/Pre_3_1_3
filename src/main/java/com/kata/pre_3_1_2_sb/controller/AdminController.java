@@ -1,6 +1,5 @@
 package com.kata.pre_3_1_2_sb.controller;
 
-import com.kata.pre_3_1_2_sb.model.Role;
 import com.kata.pre_3_1_2_sb.model.User;
 import com.kata.pre_3_1_2_sb.service.RoleService;
 import com.kata.pre_3_1_2_sb.service.UserService;
@@ -18,12 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Controller
 @AllArgsConstructor
@@ -32,14 +27,8 @@ public class AdminController {
     private final UserService userService;
     private final RoleService roleService;
 
-    @GetMapping("/new")
-    public String createNewUser(@ModelAttribute("user") User user, Model model) {
-        model.addAttribute("roleList", roleService.getAllRoles());
-        return "new";
-    }
-
     @PostMapping("/new")
-    public String saveUser(@ModelAttribute("user") User user, @RequestParam("listRoles") List<Integer> roleList) {
+    public String saveUser(@ModelAttribute("newUser") User user, @RequestParam("listRoles") List<Integer> roleList) {
         user.setRoles(roleService.findRoles(roleList));
         userService.save(user);
         return "redirect:/admin";
@@ -51,13 +40,6 @@ public class AdminController {
         model.addAttribute("currentUser", userService.getUser(userDetails));
         model.addAttribute("roleList", roleService.getAllRoles());
         return "admin";
-    }
-
-    @GetMapping("/edit/{id}")
-    public String editUser(@PathVariable UUID id, Model model) {
-        model.addAttribute("user", userService.getUserById(id));
-        model.addAttribute("roleList", roleService.getAllRoles());
-        return "edit";
     }
 
     @PatchMapping("/edit/{id}")
