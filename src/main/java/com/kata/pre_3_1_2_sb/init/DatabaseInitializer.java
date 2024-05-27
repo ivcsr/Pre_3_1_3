@@ -18,7 +18,6 @@ public class DatabaseInitializer {
     private final RoleService roleService;
 
     @PostConstruct
-    @Transactional
     public void initialize() {
         Role userRole = createAndSaveRole("ROLE_USER");
         User user = createUser("User", "IT", 22, "user@email.com", "pass", Set.of(userRole));
