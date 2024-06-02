@@ -1,5 +1,6 @@
 package com.kata.pre_3_1_2_sb.init;
 
+import com.kata.pre_3_1_2_sb.mapper.UserMapper;
 import com.kata.pre_3_1_2_sb.model.Role;
 import com.kata.pre_3_1_2_sb.model.User;
 import com.kata.pre_3_1_2_sb.service.RoleService;
@@ -16,16 +17,18 @@ import java.util.Set;
 public class DatabaseInitializer {
     private final UserService userService;
     private final RoleService roleService;
+    private final UserMapper userMapper;
 
     @PostConstruct
     public void initialize() {
         Role userRole = createAndSaveRole("ROLE_USER");
         User user = createUser("User", "IT", 22, "user@email.com", "pass", Set.of(userRole));
-        userService.save(user);
+
+        userService.save(userMapper.toUserRequest(user));
 
         Role adminRole = createAndSaveRole("ROLE_ADMIN");
         User admin = createUser("Admin", "IT", 22, "admin@email.com", "pass", Set.of(adminRole, userRole));
-        userService.save(admin);
+        userService.save(userMapper.toUserRequest(admin));
     }
 
     private Role createAndSaveRole(String roleName) {
