@@ -1,24 +1,25 @@
 package com.kata.pre_3_1_2_sb.controller;
 
-import com.kata.pre_3_1_2_sb.model.User;
+import com.kata.pre_3_1_2_sb.api.request.UserRequest;
+import com.kata.pre_3_1_2_sb.api.response.RoleResponse;
+import com.kata.pre_3_1_2_sb.api.response.UserResponse;
 import com.kata.pre_3_1_2_sb.service.RoleService;
 import com.kata.pre_3_1_2_sb.service.UserService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
-import java.util.UUID;
 
 @Controller
 @AllArgsConstructor
@@ -28,30 +29,42 @@ public class AdminController {
     private final RoleService roleService;
 
     @PostMapping("/new")
-    public String saveUser(@ModelAttribute("newUser") User user, @RequestParam("listRoles") List<Integer> roleList) {
-        user.setRoles(roleService.findRoles(roleList));
-        userService.save(user);
-        return "redirect:/admin";
-    }
-    @GetMapping()
-    public String getAdmin(@AuthenticationPrincipal UserDetails userDetails, Model model,
-                           @ModelAttribute("newUser") User user) {
-        model.addAttribute("users", userService.getUsers());
-        model.addAttribute("currentUser", userService.getUser(userDetails));
-        model.addAttribute("roleList", roleService.getAllRoles());
-        return "admin";
+    public ResponseEntity<HttpStatus> saveUser(@RequestBody UserRequest userRequest) {
+        System.out.println(userRequest);
+        userService.save(userRequest);
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @PatchMapping("/edit/{id}")
-    public String updateUser(@ModelAttribute("user") User user, @RequestParam("listRoles") List<Integer> roleList) {
-        user.setRoles(roleService.findRoles(roleList));
-        userService.updateUser(user);
-        return "redirect:/admin";
+    @GetMapping("/getCurrentUser")
+    public ResponseEntity<UserResponse> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(userService.getUser(userDetails));
+    }
+
+    @GetMapping("/getAllUsers")
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        return ResponseEntity.ok(userService.getUsers());
+    }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+
+    @PutMapping("/edit")
+    public ResponseEntity<UserRequest> updateUser(@RequestBody UserRequest userRequest) {
+        System.out.println("User: " + userRequest);
+        userService.updateUser(userRequest);
+        return ResponseEntity.ok(userRequest);
+    }
+
+    @GetMapping("/getRoles")
+    public ResponseEntity<List<RoleResponse>> getAllRoles() {
+        return ResponseEntity.ok(roleService.getAllRoles());
     }
 
     @DeleteMapping("/delete/{id}")
-    public String deleteUser(@PathVariable UUID id) {
+    public ResponseEntity<HttpStatus> deleteUser(@PathVariable Long id) {
         userService.removeUserById(id);
-        return "redirect:/admin";
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 }

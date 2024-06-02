@@ -1,9 +1,12 @@
 package com.kata.pre_3_1_2_sb.service;
 
+import com.kata.pre_3_1_2_sb.api.request.UserRequest;
+import com.kata.pre_3_1_2_sb.api.response.UserResponse;
 import com.kata.pre_3_1_2_sb.dao.UserDao;
+import com.kata.pre_3_1_2_sb.mapper.UserMapper;
 import com.kata.pre_3_1_2_sb.model.Role;
 import com.kata.pre_3_1_2_sb.model.User;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,35 +18,39 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserDao userDao;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     @Override
     @Transactional
-    public void save(User newUser) {
+    public void save(UserRequest userRequest) {
+        User newUser = userMapper.toUser(userRequest);
         String encodePassword = passwordEncoder.encode(newUser.getPassword());
         newUser.setPassword(encodePassword);
         userDao.save(newUser);
     }
 
     @Override
-    public List<User> getUsers() {
-        return userDao.getUsers();
+    public List<UserResponse> getUsers() {
+        List<User> userList = userDao.getUsers();
+        return userMapper.toUserResponseList(userList);
     }
 
     @Override
-    public User getUserById(UUID id) {
-        return userDao.getUserById(id);
+    public UserResponse getUserById(Long id) {
+        User user = userDao.getUserById(id);
+        return userMapper.toUserResponse(user);
     }
 
     @Override
     @Transactional
-    public void updateUser(User updatableUser) {
+    public void updateUser(UserRequest userRequest) {
+        User updatableUser = userMapper.toUser(userRequest);
         User originalUser = userDao.getUserById(updatableUser.getId());
         String originalPassword = originalUser.getPassword();
 
@@ -61,14 +68,15 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     @Transactional
-    public void removeUserById(UUID id) {
+    public void removeUserById(Long id) {
         userDao.removeById(id);
     }
 
     @Override
-    public User getUser(UserDetails userDetails) {
+    public UserResponse getUser(UserDetails userDetails) {
         String email = userDetails.getUsername();
-        return userDao.findByEmail(email);
+        User user = userDao.findByEmail(email);
+        return userMapper.toUserResponse(user);
     }
 
     @Transactional
