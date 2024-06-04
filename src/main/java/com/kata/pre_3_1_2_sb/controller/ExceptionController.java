@@ -2,12 +2,11 @@ package com.kata.pre_3_1_2_sb.controller;
 
 import com.kata.pre_3_1_2_sb.exception.NotFoundException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class ExceptionController {
     @ResponseBody
     @ExceptionHandler(NotFoundException.class)
